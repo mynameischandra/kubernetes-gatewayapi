@@ -1,0 +1,46 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: apex-gateway
+  namespace: banking-system
+spec:
+  gatewayClassName: nginx
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    hostname: apex.local
+    allowedRoutes:
+      namespaces:
+        from: Same
+  - name: http-wildcard
+    protocol: HTTP
+    port: 80
+    hostname: "*.apex.local"
+    allowedRoutes:
+      namespaces:
+        from: Same
+  - name: https
+    protocol: HTTPS
+    port: 443
+    hostname: apex.local
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: apex-app-tls
+        namespace: banking-system
+    allowedRoutes:
+      namespaces:
+        from: Same
+  - name: https-wildcard
+    protocol: HTTPS
+    port: 443
+    hostname: "*.apex.local"
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: apex-app-tls
+        namespace: banking-system
+    allowedRoutes:
+      namespaces:
+        from: Same

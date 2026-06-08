@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: medicenter-app-cert
+  namespace: hospital-system
+spec:
+  dnsNames:
+  - medicenter.local
+  - api.medicenter.local
+  - dashboard.medicenter.local
+  - auth.medicenter.local
+  issuerRef:
+    name: medicenter-root-issuer
+    kind: Issuer
+    group: cert-manager.io
+  secretName: medicenter-app-tls

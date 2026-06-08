@@ -1,0 +1,8 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: apex-root-issuer
+  namespace: banking-system
+spec:
+  ca:
+    secretName: apex-root-ca-secret

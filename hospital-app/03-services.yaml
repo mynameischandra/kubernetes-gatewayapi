@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: med-portal
+  namespace: hospital-system
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: med-portal
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: med-dashboard
+  namespace: hospital-system
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: med-dashboard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: med-auth
+  namespace: hospital-system
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: med-auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: med-api
+  namespace: hospital-system
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: med-api
+    version: v1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: med-api-canary
+  namespace: hospital-system
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: med-api
+    version: v2

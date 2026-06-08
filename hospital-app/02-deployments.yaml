@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: med-portal
+  namespace: hospital-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: med-portal
+  template:
+    metadata:
+      labels:
+        app: med-portal
+    spec:
+      containers:
+      - name: web-portal
+        image: fincoro-app:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: APP_ROLE
+          value: hospital-frontend
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: med-dashboard
+  namespace: hospital-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: med-dashboard
+  template:
+    metadata:
+      labels:
+        app: med-dashboard
+    spec:
+      containers:
+      - name: user-console
+        image: fincoro-app:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: APP_ROLE
+          value: hospital-dashboard
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: med-auth
+  namespace: hospital-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: med-auth
+  template:
+    metadata:
+      labels:
+        app: med-auth
+    spec:
+      containers:
+      - name: identity
+        image: fincoro-app:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: APP_ROLE
+          value: hospital-auth
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: med-api
+  namespace: hospital-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: med-api
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: med-api
+        version: v1
+    spec:
+      containers:
+      - name: api
+        image: fincoro-app:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: APP_ROLE
+          value: hospital-api
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: med-api-canary
+  namespace: hospital-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: med-api
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: med-api
+        version: v2
+    spec:
+      containers:
+      - name: api
+        image: fincoro-app:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: APP_ROLE
+          value: hospital-api-canary
+        ports:
+        - containerPort: 8080
+          protocol: TCP

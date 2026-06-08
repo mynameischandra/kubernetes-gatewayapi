@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: apex-root-ca
+  namespace: banking-system
+spec:
+  commonName: apex-root-ca
+  isCA: true
+  issuerRef:
+    name: selfsigned-root
+    kind: ClusterIssuer
+    group: cert-manager.io
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  secretName: apex-root-ca-secret

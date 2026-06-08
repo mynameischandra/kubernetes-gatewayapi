@@ -1,0 +1,115 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hospital-ssl-redirect
+  namespace: hospital-system
+spec:
+  hostnames:
+  - medicenter.local
+  - "*.medicenter.local"
+  parentRefs:
+  - name: hospital-gateway
+    sectionName: http
+  - name: hospital-gateway
+    sectionName: http-wildcard
+  rules:
+  - filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hospital-portal-route
+  namespace: hospital-system
+spec:
+  hostnames:
+  - medicenter.local
+  parentRefs:
+  - name: hospital-gateway
+    sectionName: https
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: med-portal
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hospital-backend-route
+  namespace: hospital-system
+spec:
+  hostnames:
+  - api.medicenter.local
+  parentRefs:
+  - name: hospital-gateway
+    sectionName: https-wildcard
+  rules:
+  - matches:
+    - headers:
+      - name: X-MediCenter-Canary
+        type: Exact
+        value: "true"
+      path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: med-api-canary
+      port: 8080
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: med-api
+      port: 8080
+      weight: 90
+    - name: med-api-canary
+      port: 8080
+      weight: 10
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hospital-login-route
+  namespace: hospital-system
+spec:
+  hostnames:
+  - auth.medicenter.local
+  parentRefs:
+  - name: hospital-gateway
+    sectionName: https-wildcard
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: med-auth
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hospital-console-route
+  namespace: hospital-system
+spec:
+  hostnames:
+  - dashboard.medicenter.local
+  parentRefs:
+  - name: hospital-gateway
+    sectionName: https-wildcard
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: med-dashboard
+      port: 8080

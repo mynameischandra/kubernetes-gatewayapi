@@ -1,0 +1,115 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ssl-redirect-route
+  namespace: banking-system
+spec:
+  hostnames:
+  - apex.local
+  - "*.apex.local"
+  parentRefs:
+  - name: apex-gateway
+    sectionName: http
+  - name: apex-gateway
+    sectionName: http-wildcard
+  rules:
+  - filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: portal-route
+  namespace: banking-system
+spec:
+  hostnames:
+  - apex.local
+  parentRefs:
+  - name: apex-gateway
+    sectionName: https
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: web-portal
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: backend-route
+  namespace: banking-system
+spec:
+  hostnames:
+  - api.apex.local
+  parentRefs:
+  - name: apex-gateway
+    sectionName: https-wildcard
+  rules:
+  - matches:
+    - headers:
+      - name: X-Apex-Canary
+        type: Exact
+        value: "true"
+      path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: core-api-canary
+      port: 8080
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: core-api
+      port: 8080
+      weight: 90
+    - name: core-api-canary
+      port: 8080
+      weight: 10
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: login-route
+  namespace: banking-system
+spec:
+  hostnames:
+  - auth.apex.local
+  parentRefs:
+  - name: apex-gateway
+    sectionName: https-wildcard
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: identity-service
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: console-route
+  namespace: banking-system
+spec:
+  hostnames:
+  - dashboard.apex.local
+  parentRefs:
+  - name: apex-gateway
+    sectionName: https-wildcard
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: user-console
+      port: 8080
